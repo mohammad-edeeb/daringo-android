@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/etBlock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Block #4"
+        android:textColorHint="#801a1a1a"
+        android:textSize="17sp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textAppearance="@style/Default"
+        android:paddingBottom="25dp"
+        android:drawablePadding="20dp"/>
+
+</LinearLayout>

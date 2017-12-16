@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/welcome" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="113dp"
+            android:text="DARINGO"
+            android:textAppearance="@style/Default"
+            android:textColor="#141414"
+            android:textSize="45sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="37dp"
+            android:text="Play a predection game with your friends &amp;"
+            android:textAppearance="@style/Default"
+            android:textColor="#141414"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="see who knows better and win the challenge"
+            android:textAppearance="@style/Default"
+            android:textColor="#141414"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="29dp"
+            android:text="Continue with"
+            android:textAppearance="@style/Default"
+            android:textColor="#3d5b99"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/bLoginByFacebook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:text="facebook"
+            android:textColor="#f4f4f4"
+            android:textSize="23sp"
+            android:textAppearance="@style/Default"
+            android:background="@drawable/blue_button"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            android:text="Terms of services &amp; Privacy policy"
+            android:textAppearance="@style/Default"
+            android:textColor="#141414"
+            android:layout_gravity="bottom|center_horizontal"
+            android:textSize="9sp" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rlMain"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/rivFriendPhoto"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginBottom="13dp"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/avatar"
+        android:scaleType="centerCrop"
+        app:riv_oval="true"/>
+
+    <ImageView
+        android:id="@+id/ivChecked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/rivFriendPhoto"
+        android:layout_marginRight="-60dp"
+        android:layout_toLeftOf="@id/rivFriendPhoto"
+        android:src="@drawable/checked_copy_3" />
+
+    <TextView
+        android:id="@+id/tvFriendName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="16dp"
+        android:layout_toRightOf="@id/rivFriendPhoto"
+        android:text="Hamada El Deeb"
+        android:textAppearance="@style/Default"
+        android:textColor="#1a1a1a"
+        android:textSize="18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/rivFriendPhoto"
+        android:background="#80D3D3D3"></View>
+
+</RelativeLayout>

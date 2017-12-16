@@ -1,0 +1,167 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="badeeb.com.daringo.fragments.CreateChallengeFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="#e5e5e5"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="16dp"
+                android:text="Add title &amp; rules"
+                android:textAppearance="@style/Default"
+                android:textColor="#1b70b8"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="25dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/etTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Title"
+                android:drawableLeft="@drawable/title"
+                android:textColorHint="#801a1a1a"
+                android:textSize="18sp"
+                android:textAppearance="@style/Default"
+                android:paddingBottom="25dp"
+                android:drawablePadding="20dp"/>
+
+            <EditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:hint="Description"
+                android:drawableLeft="@drawable/description"
+                android:textColorHint="#801a1a1a"
+                android:textSize="18sp"
+                android:textAppearance="@style/Default"
+                android:textColorHighlight="#FF0000"
+                android:paddingBottom="25dp"
+                android:drawablePadding="20dp"/>
+
+            <EditText
+                android:id="@+id/etBlocks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:hint="Blocks"
+                android:inputType="number"
+                android:drawableLeft="@drawable/blocks"
+                android:textColorHint="#801a1a1a"
+                android:textSize="18sp"
+                android:textAppearance="@style/Default"
+                android:textColorHighlight="#FF0000"
+                android:paddingBottom="25dp"
+                android:drawablePadding="20dp"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp">
+
+                <ImageView
+                    android:id="@+id/ivTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:src="@drawable/time"/>
+
+                <TextView
+                    android:id="@+id/tvSetTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_toRightOf="@id/ivTime"
+                    android:text="Set Time"
+                    android:textAppearance="@style/Default"
+                    android:textColor="#1a1a1a"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="35dp"
+                    android:layout_below="@id/tvSetTime"
+                    android:layout_alignLeft="@id/tvSetTime"
+                    android:text="Start"
+                    android:textAppearance="@style/Default"
+                    android:textColor="#1a1a1a"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvStartDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="70dp"
+                    android:layout_toRightOf="@id/tvStart"
+                    android:layout_alignTop="@id/tvStart"
+                    android:text="Sun, Nov 26 16:00"
+                    android:textAppearance="@style/Default"
+                    android:textColor="#1a1a1a"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="25dp"
+                    android:layout_below="@id/tvStart"
+                    android:layout_alignLeft="@id/tvSetTime"
+                    android:text="End"
+                    android:textAppearance="@style/Default"
+                    android:textColor="#1a1a1a"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvEndDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/tvStartDate"
+                    android:layout_toRightOf="@id/tvEnd"
+                    android:layout_alignTop="@id/tvEnd"
+                    android:text="Sun, Nov 26 16:00"
+                    android:textAppearance="@style/Default"
+                    android:textColor="#1a1a1a"
+                    android:textSize="18sp"/>
+
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabCreate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:backgroundTint="#40bcd8"
+        android:src="@drawable/checked_copy_4"
+        app:borderWidth="0dp" />
+
+</FrameLayout>

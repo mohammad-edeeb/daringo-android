@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "186100809377",
+    "firebase_url": "https://daringo-a9877.firebaseio.com",
+    "project_id": "daringo-a9877",
+    "storage_bucket": "daringo-a9877.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186100809377:android:16f12d0e8a3c5821",
+        "android_client_info": {
+          "package_name": "badeeb.com.daringo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186100809377-2lv94c6ps6218vro5b9on44fc06jnh50.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "badeeb.com.daringo",
+            "certificate_hash": "19553faa8ad86c6223231a097a8346640e6fff4d"
+          }
+        },
+        {
+          "client_id": "186100809377-rfbaqe26o1ftr5fmpo5t4s3kl89t85qi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEfjI8a29tJQCl0kzxTwMipUo6Vp0VuBE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186100809377-rfbaqe26o1ftr5fmpo5t4s3kl89t85qi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

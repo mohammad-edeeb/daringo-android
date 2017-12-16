@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:id="@+id/firstGroup"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_new_challenge"
+            android:title="Start New Challenge" />
+        <item
+            android:id="@+id/nav_positions"
+            android:title="Positions &amp; Rewards" />
+        <item
+            android:id="@+id/nav_explore"
+            android:title="Explore" />
+    </group>
+
+    <group android:id="@+id/secondGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_contacts"
+            android:title="Contacts" />
+        <item
+            android:id="@+id/nav_invite"
+            android:title="Invite Friends" />
+    </group>
+
+    <group android:id="@+id/thirdGroup"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_settings"
+            android:title="Settings" />
+        <item
+            android:id="@+id/nav_faq"
+            android:title="Daringo FAQ" />
+        <item
+            android:id="@+id/nav_sigout"
+            android:title="Sign Out" />
+    </group>
+
+</menu>
