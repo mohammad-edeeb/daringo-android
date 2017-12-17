@@ -35,7 +35,7 @@ public interface ApiInterface {
     Call<BaseResponse<ChallengesListResponse>> getChallengesList();
 
     @GET("challenges/ended")
-    Call<BaseResponse<ChallengesListResponse>> getEndedChallengesList();
+    Call<BaseResponse<ChallengesListResponse>> getPastChallengesList();
 
     @POST("challenges")
     Call<BaseResponse<CreateChallengeResponse>> createChallenge(

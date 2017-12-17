@@ -3,14 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <item
+        android:id="@+id/nav_new_challenge"
+        android:title="Start New Challenge" />
     <group android:id="@+id/firstGroup"
-        android:checkableBehavior="none">
+        android:checkableBehavior="single">
+
         <item
-            android:id="@+id/nav_new_challenge"
-            android:title="Start New Challenge" />
+            android:id="@+id/nav_active_challenges"
+            android:title="Active Challenges" />
         <item
-            android:id="@+id/nav_positions"
-            android:title="Positions &amp; Rewards" />
+            android:id="@+id/nav_past_challenges"
+            android:title="Past Challenges" />
         <item
             android:id="@+id/nav_explore"
             android:title="Explore" />

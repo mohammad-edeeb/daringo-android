@@ -1,12 +1,12 @@
 package badeeb.com.daringo.activities;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -20,8 +20,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -31,16 +34,12 @@ import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.parceler.Parcels;
 
-import java.util.List;
+import java.util.Calendar;
 
 import badeeb.com.daringo.R;
-import badeeb.com.daringo.adapters.ChallengesRecyclerAdapter;
-import badeeb.com.daringo.adapters.OnRecyclerItemClick;
-import badeeb.com.daringo.models.requests.BaseRequest;
-import badeeb.com.daringo.models.requests.UnsubscribeRequest;
+import badeeb.com.daringo.fragments.ActiveChallengesFragment;
+import badeeb.com.daringo.fragments.PastChallengesFragment;
 import badeeb.com.daringo.models.responses.BaseResponse;
-import badeeb.com.daringo.models.Challenge;
-import badeeb.com.daringo.models.responses.ChallengesListResponse;
 import badeeb.com.daringo.models.User;
 import badeeb.com.daringo.models.responses.EmptyResponse;
 import badeeb.com.daringo.network.ApiClient;
@@ -57,17 +56,10 @@ public class MainActivity extends CustomFontActivity
 
     public static final String EXTRA_CURRENT_USER = "EXTRA_CURRENT_USER";
 
-    private RecyclerView rvChallenges;
-    private ProgressBar pbLoading;
-    private TextView tvNoChallenges;
-    private TextView tvNumOfChallenges;
-    private SwipeRefreshLayout srlChallengesList;
-
-    private ChallengesRecyclerAdapter challengesRecyclerAdapter;
-    private OnRecyclerItemClick<Challenge> onChallengeClickedListener;
     private AppSettings settings;
     private User currentUser;
-    private boolean deleteMode;
+    public boolean deleteMode;
+    public FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +69,7 @@ public class MainActivity extends CustomFontActivity
         setSupportActionBar(toolbar);
 
         settings = AppSettings.getInstance();
-        onChallengeClickedListener = createOnChallengeClickedListener();
+
 
         if (getIntent().getParcelableExtra(EXTRA_CURRENT_USER) != null) {
             currentUser = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_CURRENT_USER));
@@ -85,7 +77,7 @@ public class MainActivity extends CustomFontActivity
             currentUser = settings.getUser();
         }
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,123 +96,22 @@ public class MainActivity extends CustomFontActivity
         navigationView.setNavigationItemSelectedListener(this);
         applyFontToNavigationView(navigationView);
 
-        rvChallenges = findViewById(R.id.rvChallenges);
-        challengesRecyclerAdapter = new ChallengesRecyclerAdapter(this);
-
-        challengesRecyclerAdapter.setOnRecyclerItemClick(onChallengeClickedListener);
-
-        rvChallenges.setAdapter(challengesRecyclerAdapter);
-        rvChallenges.setLayoutManager(new LinearLayoutManager(this));
-
-        pbLoading = findViewById(R.id.pbLoading);
-        tvNoChallenges = findViewById(R.id.tvNoChallenges);
-        tvNumOfChallenges = findViewById(R.id.tvNumOfChallenges);
-        srlChallengesList = findViewById(R.id.srlChallengesList);
-        srlChallengesList.setColorSchemeResources(R.color.colorAccent);
-
-
-        srlChallengesList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                callGetChallengesListApi();
-            }
-        });
-
-        rvChallenges.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 || dy < 0 && fab.isShown()) {
-                    fab.hide();
-                }
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    fab.show();
-                }
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
-
         setUserNameAndPhoto(navigationView.getHeaderView(0));
-        callGetChallengesListApi();
+
+        navigationView.setCheckedItem(R.id.nav_active_challenges);
+        goToActiveChallengesFragment();
     }
 
-    private OnRecyclerItemClick<Challenge> createOnChallengeClickedListener() {
-        return new OnRecyclerItemClick<Challenge>() {
-            @Override
-            public void OnRecyclerItemClick(View view, Challenge item, int position) {
-                if (deleteMode) {
-                    challengesRecyclerAdapter.highlightChallenge(item, position);
-                    return;
-                }
-                Intent intent = new Intent(MainActivity.this, InsideChallengeActivity.class);
-                intent.putExtra(InsideChallengeActivity.EXTRA_CHALLENGE, Parcels.wrap(item));
-                startActivity(intent);
-            }
-        };
-    }
-
-    private void callGetChallengesListApi() {
-        ApiClient apiClient = new ApiClient();
-        ApiInterface apiService = apiClient.getClient(true)
-                .create(ApiInterface.class);
-
-        UiUtils.hide(tvNoChallenges);
-
-        if (!srlChallengesList.isRefreshing()) {
-            UiUtils.show(pbLoading);
-            UiUtils.hide(rvChallenges);
+    public void onChallengeDeleteMode(boolean deleteMode) {
+        this.deleteMode = deleteMode;
+        if(deleteMode){
+            UiUtils.hide(fab);
+        } else {
+            UiUtils.show(fab);
         }
-
-        final Call<BaseResponse<ChallengesListResponse>> response = apiService.getChallengesList();
-        response.enqueue(new Callback<BaseResponse<ChallengesListResponse>>() {
-            @Override
-            public void onResponse(Call<BaseResponse<ChallengesListResponse>> call, Response<BaseResponse<ChallengesListResponse>> response) {
-                if (response.code() == 200) {
-                    List<Challenge> challenges = response.body().getData().getChallenges();
-                    tvNumOfChallenges.setText("(" + challenges.size() + ")");
-                    if (!challenges.isEmpty()) {
-                        challengesRecyclerAdapter.setItems(challenges);
-                        challengesRecyclerAdapter.notifyDataSetChanged();
-                        UiUtils.show(rvChallenges);
-                        UiUtils.hide(tvNoChallenges);
-                    } else {
-                        UiUtils.hide(rvChallenges);
-                        UiUtils.show(tvNoChallenges);
-                    }
-
-                    if (srlChallengesList.isRefreshing()) {
-                        srlChallengesList.setRefreshing(false);
-                    }
-                    if (pbLoading.isShown()) {
-                        UiUtils.hide(pbLoading);
-                    }
-
-                } else {
-                    Toast.makeText(MainActivity.this, "Bad Request", Toast.LENGTH_SHORT).show();
-                    if (!srlChallengesList.isRefreshing()) {
-                        UiUtils.hide(pbLoading);
-                        UiUtils.show(rvChallenges);
-                    } else {
-                        srlChallengesList.setRefreshing(false);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse<ChallengesListResponse>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Bad Request", Toast.LENGTH_SHORT).show();
-                if (!srlChallengesList.isRefreshing()) {
-                    UiUtils.hide(pbLoading);
-                    UiUtils.show(rvChallenges);
-                } else {
-                    srlChallengesList.setRefreshing(false);
-                }
-            }
-        });
+        invalidateOptionsMenu();
     }
+
 
     private void setUserNameAndPhoto(View headerView) {
         RoundedImageView rivUserPhoto = headerView.findViewById(R.id.rivUserPhoto);
@@ -264,10 +155,12 @@ public class MainActivity extends CustomFontActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if(challengesRecyclerAdapter.isDeleteMode()){
+        } else if(deleteMode){
             // clear to be deleted challenges
-            challengesRecyclerAdapter.revertDeleteMode();
-        } else {
+            ActiveChallengesFragment fragment = (ActiveChallengesFragment) getCurrentFragment();
+            fragment.challengesRecyclerAdapter.revertDeleteMode();
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -287,15 +180,23 @@ public class MainActivity extends CustomFontActivity
 
         } else if (id == R.id.nav_faq) {
 
-        } else if (id == R.id.nav_positions) {
-
-        } else if (id == R.id.nav_settings) {
-
+        } else if (id == R.id.nav_past_challenges) {
+            if(!(getCurrentFragment() instanceof PastChallengesFragment)){
+                goToPastChallengesFragment();
+            }
+        } else if (id == R.id.nav_active_challenges) {
+            if(!(getCurrentFragment() instanceof ActiveChallengesFragment)) {
+                goToActiveChallengesFragment();
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private Fragment getCurrentFragment(){
+        return getSupportFragmentManager().findFragmentById(R.id.flMainFrame);
     }
 
     private void callLogoutApi() {
@@ -327,6 +228,22 @@ public class MainActivity extends CustomFontActivity
         });
     }
 
+    public void goToActiveChallengesFragment() {
+        UiUtils.show(fab);
+        ActiveChallengesFragment activeChallengesFragment = new ActiveChallengesFragment();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.flMainFrame, activeChallengesFragment, activeChallengesFragment.TAG);
+        fragmentTransaction.commit();
+    }
+
+    public void goToPastChallengesFragment() {
+        UiUtils.hide(fab);
+        PastChallengesFragment pastChallengesFragment = new PastChallengesFragment();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.flMainFrame, pastChallengesFragment, pastChallengesFragment.TAG);
+        fragmentTransaction.commit();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -337,11 +254,39 @@ public class MainActivity extends CustomFontActivity
         return true;
     }
 
+    private void generateConfirmDeleteDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_confirm_delete);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_corner_white);
+
+        Button bCancel = dialog.findViewById(R.id.bCancel);
+        Button bConfirm = dialog.findViewById(R.id.bConfirm);
+
+        bCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        bConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ActiveChallengesFragment fragment = (ActiveChallengesFragment) getCurrentFragment();
+                fragment.callUnsubscribeChallengeApi();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.delete_button:
-                callUnsubscribeChallengeApi();
+                generateConfirmDeleteDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -349,37 +294,4 @@ public class MainActivity extends CustomFontActivity
         }
     }
 
-    private void callUnsubscribeChallengeApi() {
-        ApiClient apiClient = new ApiClient();
-        ApiInterface apiService = apiClient.getClient(true)
-                .create(ApiInterface.class);
-
-        UnsubscribeRequest request = new UnsubscribeRequest();
-        request.setChallenges(challengesRecyclerAdapter.getChallengesToBeDeleted());
-
-        BaseRequest<UnsubscribeRequest> baseRequest = new BaseRequest<>(request);
-
-        final Call<BaseResponse<EmptyResponse>> response = apiService.unsubscribe(baseRequest);
-        response.enqueue(new Callback<BaseResponse<EmptyResponse>>() {
-            @Override
-            public void onResponse(Call<BaseResponse<EmptyResponse>> call, Response<BaseResponse<EmptyResponse>> response) {
-                if (response.code() == 200) {
-                    challengesRecyclerAdapter.clearToBeDeleted();
-                    callGetChallengesListApi();
-                } else {
-                    Toast.makeText(MainActivity.this, "Bad Request", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse<EmptyResponse>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Bad Request", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public void onChallengeDeleteMode(boolean deleteMode) {
-        this.deleteMode = deleteMode;
-        invalidateOptionsMenu();
-    }
 }
