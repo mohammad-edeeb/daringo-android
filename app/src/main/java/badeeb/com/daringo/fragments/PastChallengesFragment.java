@@ -17,7 +17,6 @@ import java.util.List;
 
 import badeeb.com.daringo.R;
 import badeeb.com.daringo.activities.MainActivity;
-import badeeb.com.daringo.adapters.ChallengesRecyclerAdapter;
 import badeeb.com.daringo.adapters.PastChallengesRecyclerAdapter;
 import badeeb.com.daringo.models.Challenge;
 import badeeb.com.daringo.models.responses.BaseResponse;
@@ -64,7 +63,7 @@ public class PastChallengesFragment extends Fragment {
         rvChallenges.setLayoutManager(new LinearLayoutManager(context));
 
         pbLoading = rootView.findViewById(R.id.pbLoading);
-        tvNoChallenges = rootView.findViewById(R.id.tvNoChallenges);
+        tvNoChallenges = rootView.findViewById(R.id.tvNoData);
         tvNumOfChallenges = rootView.findViewById(R.id.tvNumOfChallenges);
         srlChallengesList = rootView.findViewById(R.id.srlChallengesList);
         srlChallengesList.setColorSchemeResources(R.color.colorAccent);

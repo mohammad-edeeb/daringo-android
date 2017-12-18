@@ -184,7 +184,7 @@ public class CreateChallengeFragment extends Fragment {
         if(TextUtils.isEmpty(etTitle.getText())){
             valid = false;
         }
-        if(TextUtils.isEmpty(etBlocks.getText()) || etBlocks.getText().equals("0")){
+        if(TextUtils.isEmpty(etBlocks.getText()) || etBlocks.getText().toString().equals("0")){
             valid = false;
         }
         if(valid){

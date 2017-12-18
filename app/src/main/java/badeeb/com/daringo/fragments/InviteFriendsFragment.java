@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -43,6 +44,7 @@ public class InviteFriendsFragment extends Fragment {
     private RecyclerView rvFriends;
     private TextView tvNoFriendsSelected;
     private FloatingActionButton fabNext;
+    private ProgressBar pbLoading;
 
     private FriendsRecyclerAdapter friendsAdapter;
     private PhotosHorizontalRecyclerAdapter photosAdapter;
@@ -61,6 +63,7 @@ public class InviteFriendsFragment extends Fragment {
         rvFriends = rootView.findViewById(R.id.rvFriends);
         tvNoFriendsSelected = rootView.findViewById(R.id.tvNoFriendsSelected);
         fabNext = rootView.findViewById(R.id.fabNext);
+        pbLoading = rootView.findViewById(R.id.pbLoading);
 
         UiUtils.disable(fabNext);
 
@@ -96,30 +99,36 @@ public class InviteFriendsFragment extends Fragment {
         return new OnRecyclerItemClick<FacebookFriend>() {
             @Override
             public void OnRecyclerItemClick(View view, FacebookFriend item, int position) {
-                item.setChecked(!item.isChecked());
-                friendsAdapter.refreshItem(position);
-                if(item.isChecked()){
-                    photosAdapter.add(item);
-                } else {
-                    photosAdapter.remove(item);
-                }
-                if(!photosAdapter.isEmpty()){
-                    UiUtils.hide(tvNoFriendsSelected);
-                    UiUtils.enable(fabNext);
-                } else {
-                    UiUtils.show(tvNoFriendsSelected);
-                    UiUtils.disable(fabNext);
-                }
+                checkItem(item, position);
             }
         };
     }
 
-    private void findFacebookFriends(){
-        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONArrayCallback() {
+    private void checkItem(FacebookFriend item, int position) {
+        item.setChecked(!item.isChecked());
+        friendsAdapter.refreshItem(position);
+        if (item.isChecked()) {
+            photosAdapter.add(item);
+        } else {
+            photosAdapter.remove(item);
+        }
+        if (!photosAdapter.isEmpty()) {
+            UiUtils.hide(tvNoFriendsSelected);
+            UiUtils.enable(fabNext);
+        } else {
+            UiUtils.show(tvNoFriendsSelected);
+            UiUtils.disable(fabNext);
+        }
+    }
+
+    private void findFacebookFriends() {
+        UiUtils.hide(rvFriends);
+        UiUtils.show(pbLoading);
+        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONArrayCallback() {
             @Override
             public void onCompleted(JSONArray users, GraphResponse response) {
                 ArrayList<FacebookFriend> friends = new ArrayList<>();
-
                 if (users != null) {
                     for (int i = 0; i < users.length(); i++) {
                         try {
@@ -129,17 +138,39 @@ public class InviteFriendsFragment extends Fragment {
                             String imageUrl = FacebookUtils.getImageUrl(id);
                             FacebookFriend newFriend = new FacebookFriend(id, name, imageUrl);
                             friends.add(newFriend);
-
-                            friendsAdapter.setItems(friends);
-                            friendsAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
+                    friendsAdapter.setItems(friends);
+                    friendsAdapter.notifyDataSetChanged();
+                    handleAlreadyCheckedFriends();
+                    UiUtils.show(rvFriends);
+                    UiUtils.hide(pbLoading);
                 }
+
             }
         });
         request.executeAsync();
+    }
+
+    private void handleAlreadyCheckedFriends() {
+        for (FacebookFriend item : context.getInvitedFriends()) {
+            int position = -1;
+            for (FacebookFriend friend: friendsAdapter.getItems()) {
+                if(friend.getId().equals(item.getId())){
+                    position = friendsAdapter.indexOf(friend);
+                    item = friend;
+                    break;
+                }
+            }
+            item.setChecked(true);
+            friendsAdapter.refreshItem(position);
+            photosAdapter.add(item);
+            UiUtils.hide(tvNoFriendsSelected);
+            UiUtils.enable(fabNext);
+        }
+
     }
 
     @Override

@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,17 +31,13 @@ import badeeb.com.daringo.activities.MainActivity;
 import badeeb.com.daringo.adapters.CompleteBlocksRecyclerAdapter;
 import badeeb.com.daringo.models.Block;
 import badeeb.com.daringo.models.Subscription;
-import badeeb.com.daringo.models.requests.BaseRequest;
-import badeeb.com.daringo.models.requests.UpdateSubscriptionRequest;
 import badeeb.com.daringo.models.responses.BaseResponse;
-import badeeb.com.daringo.models.responses.CompleteBlockResponse;
 import badeeb.com.daringo.models.responses.SubscriptionDetailResponse;
 import badeeb.com.daringo.models.responses.EmptyResponse;
 import badeeb.com.daringo.network.ApiClient;
 import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.AppSettings;
 import badeeb.com.daringo.utils.UiUtils;
-import badeeb.com.daringo.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,7 +56,10 @@ public class CompleteBlocksFragment extends Fragment {
     private TextView tvCompletedBlocks;
     private RecyclerView rvBlocks;
     private TextView tvPosition;
+    private TextView tvNoData;
     private FloatingActionButton fabCompleteChallenge;
+    private SwipeRefreshLayout srlChallengesList;
+    private ProgressBar pbLoading;
 
     private Subscription subscription;
     private CompleteBlocksRecyclerAdapter blocksAdapter;
@@ -80,7 +81,20 @@ public class CompleteBlocksFragment extends Fragment {
         tvCompletedBlocks = rootView.findViewById(R.id.tvCompletedBlocks);
         rvBlocks = rootView.findViewById(R.id.rvBlocks);
         tvPosition = rootView.findViewById(R.id.tvPosition);
+        tvNoData = rootView.findViewById(R.id.tvNoData);
+        pbLoading = rootView.findViewById(R.id.pbLoading);
+
         fabCompleteChallenge = rootView.findViewById(R.id.fabCompleteChallenge);
+        srlChallengesList = rootView.findViewById(R.id.srlChallengesList);
+        srlChallengesList.setColorSchemeResources(R.color.colorAccent);
+
+
+        srlChallengesList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                callGetSubscriptionDetailApi();
+            }
+        });
 
         if(getArguments().getParcelable(EXTRA_SUBSCRIPTION) != null){
             subscription = Parcels.unwrap(getArguments().getParcelable(EXTRA_SUBSCRIPTION));
@@ -117,41 +131,17 @@ public class CompleteBlocksFragment extends Fragment {
                 + "/" + context.getChallenge().getNumOfBlocks());
     }
 
-    private void callUpdateSubscriptionApi() {
-        ApiClient apiClient = new ApiClient();
-        ApiInterface apiService = apiClient.getClient(true)
-                .create(ApiInterface.class);
-
-        UpdateSubscriptionRequest request = new UpdateSubscriptionRequest();
-        subscription.setCondition(tvPosition.getText().toString());
-        subscription.setBlocks(blocksAdapter.getItems());
-        request.setSubscription(subscription);
-
-        final Call<BaseResponse<EmptyResponse>> response = apiService
-                .updateSubscription(new BaseRequest<UpdateSubscriptionRequest>(request),
-                        context.getChallenge().getId(), subscription.getId());
-
-        response.enqueue(new Callback<BaseResponse<EmptyResponse>>() {
-            @Override
-            public void onResponse(Call<BaseResponse<EmptyResponse>> call, Response<BaseResponse<EmptyResponse>> response) {
-                if (response.code() == 200) {
-                    context.goToParticipantsFragment();
-                } else {
-                    Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse<EmptyResponse>> call, Throwable t) {
-                Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void callGetSubscriptionDetailApi() {
         ApiClient apiClient = new ApiClient();
         ApiInterface apiService = apiClient.getClient(true)
                 .create(ApiInterface.class);
+
+        UiUtils.hide(tvNoData);
+
+        if (!srlChallengesList.isRefreshing()) {
+            UiUtils.show(pbLoading);
+            UiUtils.hide(rvBlocks);
+        }
 
         final Call<BaseResponse<SubscriptionDetailResponse>> response = apiService
                 .getSubscriptionDetail(context.getChallenge().getId(), subscription.getId());
@@ -161,6 +151,7 @@ public class CompleteBlocksFragment extends Fragment {
             public void onResponse(Call<BaseResponse<SubscriptionDetailResponse>> call, Response<BaseResponse<SubscriptionDetailResponse>> response) {
                 if (response.code() == 200) {
                     Subscription subscription = response.body().getData().getSubscription();
+                    List<Block> blocks = new ArrayList<>();
                     if(!currentUserSubscription){
                         List<Block> completedBlocks = new ArrayList<>();
                         for (Block block: subscription.getBlocks()) {
@@ -168,20 +159,50 @@ public class CompleteBlocksFragment extends Fragment {
                                 completedBlocks.add(block);
                             }
                         }
-                        blocksAdapter.setItems(completedBlocks);
+                        blocks = completedBlocks;
                     } else {
                         checkAllBlocksCompleted(subscription.getBlocks());
-                        blocksAdapter.setItems(subscription.getBlocks());
+                        blocks = subscription.getBlocks();
                     }
+
+                    if(!blocks.isEmpty()){
+                        UiUtils.show(rvBlocks);
+                        UiUtils.hide(tvNoData);
+                    } else {
+                        UiUtils.hide(rvBlocks);
+                        UiUtils.show(tvNoData);
+                    }
+
+                    blocksAdapter.setItems(blocks);
+
+                    if (srlChallengesList.isRefreshing()) {
+                        srlChallengesList.setRefreshing(false);
+                    }
+                    if (pbLoading.isShown()) {
+                        UiUtils.hide(pbLoading);
+                    }
+
                     blocksAdapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                    if (!srlChallengesList.isRefreshing()) {
+                        UiUtils.hide(pbLoading);
+                        UiUtils.show(rvBlocks);
+                    } else {
+                        srlChallengesList.setRefreshing(false);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<BaseResponse<SubscriptionDetailResponse>> call, Throwable t) {
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                if (!srlChallengesList.isRefreshing()) {
+                    UiUtils.hide(pbLoading);
+                    UiUtils.show(rvBlocks);
+                } else {
+                    srlChallengesList.setRefreshing(false);
+                }
             }
         });
     }

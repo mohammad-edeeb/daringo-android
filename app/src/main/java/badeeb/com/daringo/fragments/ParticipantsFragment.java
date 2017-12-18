@@ -4,11 +4,13 @@ package badeeb.com.daringo.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.List;
@@ -23,6 +25,7 @@ import badeeb.com.daringo.models.responses.SubscriptionsListResponse;
 import badeeb.com.daringo.network.ApiClient;
 import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.AppSettings;
+import badeeb.com.daringo.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,6 +38,7 @@ public class ParticipantsFragment extends Fragment {
     public static final String TAG = ParticipantsFragment.class.getSimpleName();
 
     private RecyclerView rvParticipants;
+    private ProgressBar pbLoading;
 
     private SubscriptionsRecyclerAdapter subscriptionsRecyclerAdapter;
     private OnRecyclerItemClick<Subscription> onParticipantClickedListener;
@@ -54,11 +58,12 @@ public class ParticipantsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_challenge_detail_participants, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_participants, container, false);
 
         onParticipantClickedListener = createOnParticipantClickedListener();
 
         rvParticipants = rootView.findViewById(R.id.rvParticipants);
+        pbLoading = rootView.findViewById(R.id.pbLoading);
 
         subscriptionsRecyclerAdapter = new SubscriptionsRecyclerAdapter(context, context.getChallenge());
         subscriptionsRecyclerAdapter.setOnRecyclerItemClick(onParticipantClickedListener);
@@ -76,6 +81,9 @@ public class ParticipantsFragment extends Fragment {
         ApiInterface apiService = apiClient.getClient(true)
                 .create(ApiInterface.class);
 
+        UiUtils.show(pbLoading);
+        UiUtils.hide(rvParticipants);
+
         final Call<BaseResponse<SubscriptionsListResponse>> response = apiService.getChallengeSubscriptions(context.getChallenge().getId());
         response.enqueue(new Callback<BaseResponse<SubscriptionsListResponse>>() {
             @Override
@@ -89,14 +97,26 @@ public class ParticipantsFragment extends Fragment {
                         subscriptionsRecyclerAdapter.setItems(subscriptions);
                         subscriptionsRecyclerAdapter.notifyDataSetChanged();
                     }
+                    UiUtils.show(rvParticipants);
+                    if (pbLoading.isShown()) {
+                        UiUtils.hide(pbLoading);
+                    }
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                    UiUtils.show(rvParticipants);
+                    if (pbLoading.isShown()) {
+                        UiUtils.hide(pbLoading);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<BaseResponse<SubscriptionsListResponse>> call, Throwable t) {
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                UiUtils.show(rvParticipants);
+                if (pbLoading.isShown()) {
+                    UiUtils.hide(pbLoading);
+                }
             }
         });
     }

@@ -66,6 +66,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<Recycl
         remove(position);
     }
 
+    public int indexOf(T item){
+        return items.indexOf(item);
+    }
+
     public List<T> getItems(){
         return items;
     }

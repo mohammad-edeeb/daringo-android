@@ -56,6 +56,13 @@
             android:layout_height="1dp"
             android:background="#80D3D3D3"></View>
 
+        <ProgressBar
+            android:id="@+id/pbLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_weight="1" />
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvFriends"
             android:layout_width="match_parent"

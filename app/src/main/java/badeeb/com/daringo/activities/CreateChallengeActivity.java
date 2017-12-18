@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import badeeb.com.daringo.R;
@@ -21,7 +22,7 @@ import badeeb.com.daringo.utils.Utils;
 public class CreateChallengeActivity extends CustomFontActivity {
 
     private FrameLayout flMainFrame;
-    private List<FacebookFriend> invitedFriends;
+    private List<FacebookFriend> invitedFriends = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

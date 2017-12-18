@@ -46,7 +46,7 @@ public class ActiveChallengesFragment extends Fragment {
 
     private RecyclerView rvChallenges;
     private ProgressBar pbLoading;
-    private TextView tvNoChallenges;
+    private TextView tvNoData;
     private TextView tvNumOfChallenges;
     private SwipeRefreshLayout srlChallengesList;
 
@@ -78,7 +78,7 @@ public class ActiveChallengesFragment extends Fragment {
         rvChallenges.setLayoutManager(new LinearLayoutManager(context));
 
         pbLoading = rootView.findViewById(R.id.pbLoading);
-        tvNoChallenges = rootView.findViewById(R.id.tvNoChallenges);
+        tvNoData = rootView.findViewById(R.id.tvNoData);
         tvNumOfChallenges = rootView.findViewById(R.id.tvNumOfChallenges);
         srlChallengesList = rootView.findViewById(R.id.srlChallengesList);
         srlChallengesList.setColorSchemeResources(R.color.colorAccent);
@@ -133,7 +133,7 @@ public class ActiveChallengesFragment extends Fragment {
         ApiInterface apiService = apiClient.getClient(true)
                 .create(ApiInterface.class);
 
-        UiUtils.hide(tvNoChallenges);
+        UiUtils.hide(tvNoData);
 
         if (!srlChallengesList.isRefreshing()) {
             UiUtils.show(pbLoading);
@@ -151,10 +151,10 @@ public class ActiveChallengesFragment extends Fragment {
                         challengesRecyclerAdapter.setItems(challenges);
                         challengesRecyclerAdapter.notifyDataSetChanged();
                         UiUtils.show(rvChallenges);
-                        UiUtils.hide(tvNoChallenges);
+                        UiUtils.hide(tvNoData);
                     } else {
                         UiUtils.hide(rvChallenges);
-                        UiUtils.show(tvNoChallenges);
+                        UiUtils.show(tvNoData);
                     }
 
                     if (srlChallengesList.isRefreshing()) {

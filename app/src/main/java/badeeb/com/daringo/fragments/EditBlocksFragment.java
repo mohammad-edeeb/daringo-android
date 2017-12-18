@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,7 @@ public class EditBlocksFragment extends Fragment {
     private RecyclerView rvBlocks;
     private FloatingActionButton fabUpdate;
     private EditText etPosition;
+    private ProgressBar pbLoading;
 
     private Subscription subscription;
     private EditBlocksRecyclerAdapter blocksAdapter;
@@ -72,6 +74,7 @@ public class EditBlocksFragment extends Fragment {
         rvBlocks = rootView.findViewById(R.id.rvBlocks);
         fabUpdate = rootView.findViewById(R.id.fabUpdate);
         etPosition = rootView.findViewById(R.id.etPosition);
+        pbLoading = rootView.findViewById(R.id.pbLoading);
 
         if(getArguments().getParcelable(EXTRA_SUBSCRIPTION) != null){
             subscription = Parcels.unwrap(getArguments().getParcelable(EXTRA_SUBSCRIPTION));
@@ -139,6 +142,9 @@ public class EditBlocksFragment extends Fragment {
         ApiInterface apiService = apiClient.getClient(true)
                 .create(ApiInterface.class);
 
+        UiUtils.show(pbLoading);
+        UiUtils.hide(rvBlocks);
+
         final Call<BaseResponse<SubscriptionDetailResponse>> response = apiService
                 .getSubscriptionDetail(context.getChallenge().getId(), subscription.getId());
 
@@ -149,14 +155,26 @@ public class EditBlocksFragment extends Fragment {
                     Subscription subscription = response.body().getData().getSubscription();
                     blocksAdapter.setItems(subscription.getBlocks());
                     blocksAdapter.notifyDataSetChanged();
+                    UiUtils.show(rvBlocks);
+                    if (pbLoading.isShown()) {
+                        UiUtils.hide(pbLoading);
+                    }
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                    UiUtils.show(rvBlocks);
+                    if (pbLoading.isShown()) {
+                        UiUtils.hide(pbLoading);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<BaseResponse<SubscriptionDetailResponse>> call, Throwable t) {
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
+                UiUtils.show(rvBlocks);
+                if (pbLoading.isShown()) {
+                    UiUtils.hide(pbLoading);
+                }
             }
         });
     }
