@@ -68,6 +68,8 @@ public class MainActivity extends CustomFontActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+
         settings = AppSettings.getInstance();
 
 

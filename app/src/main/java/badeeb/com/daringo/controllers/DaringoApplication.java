@@ -2,7 +2,10 @@ package badeeb.com.daringo.controllers;
 
 import android.app.Application;
 
+import com.crashlytics.android.Crashlytics;
+
 import badeeb.com.daringo.R;
+import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 /**
@@ -15,6 +18,7 @@ public class DaringoApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         sDaringoApplication = this;
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/opensans-regular.ttf")
