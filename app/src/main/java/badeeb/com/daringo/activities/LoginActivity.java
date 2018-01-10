@@ -18,6 +18,7 @@ import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +48,8 @@ public class LoginActivity extends CustomFontActivity {
     private LoginManager mLoginManager;
     private CallbackManager mFacebookCallbackManager;
     private AppSettings settings;
+
+    private boolean fcmTokenSentToUpdate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +132,10 @@ public class LoginActivity extends CustomFontActivity {
                     u.setImageUrl(object.getJSONObject("picture").getJSONObject("data").getString("url"));
                     u.setSocialAccountId(object.getString("id"));
                     u.setSocialAccountToken(token.getToken());
-                    u.setFcmToken(settings.getFcmToken());
+                    if(FirebaseInstanceId.getInstance().getToken() != null){
+                        u.setFcmToken(FirebaseInstanceId.getInstance().getToken());
+                        fcmTokenSentToUpdate = true;
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -161,6 +167,9 @@ public class LoginActivity extends CustomFontActivity {
                 if (response.code() == 200) {
                     User user = response.body().getData().getUser();
                     settings.saveUser(user);
+                    if(fcmTokenSentToUpdate){
+                        settings.setFcmTokenSaved(true);
+                    }
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.putExtra(MainActivity.EXTRA_CURRENT_USER, Parcels.wrap(user));
                     LoginActivity.this.startActivity(intent);

@@ -8,7 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import badeeb.com.daringo.R;
+import badeeb.com.daringo.activities.MainActivity;
 import badeeb.com.daringo.models.Challenge;
 import badeeb.com.daringo.utils.AppSettings;
 
@@ -18,8 +22,12 @@ import badeeb.com.daringo.utils.AppSettings;
 
 public class PastChallengesRecyclerAdapter extends BaseRecyclerAdapter<Challenge> {
 
+    private boolean deleteMode = false;
+    private List<Challenge> toBeDeleted;
+
     public PastChallengesRecyclerAdapter(Context mContext) {
         super(mContext);
+        toBeDeleted = new ArrayList<>();
     }
 
     @Override
@@ -29,10 +37,23 @@ public class PastChallengesRecyclerAdapter extends BaseRecyclerAdapter<Challenge
         return new ViewHolder(view);
     }
 
+    public List<Challenge> getChallengesToBeDeleted(){
+        return toBeDeleted;
+    }
+
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         super.onBindViewHolder(holder, position);
         final Challenge challenge = getItemAt(position);
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                highlightChallenge(challenge, position);
+                return true;
+            }
+        });
+
         ViewHolder viewHolder = (ViewHolder) holder;
         if (challenge.isHighlighted()) {
             holder.itemView.setBackgroundColor(ContextCompat
@@ -43,6 +64,33 @@ public class PastChallengesRecyclerAdapter extends BaseRecyclerAdapter<Challenge
         }
         viewHolder.tvChallengeTitle.setText(challenge.getTitle());
         viewHolder.tvWinnerStatus.setText(getWinnerStatus(challenge));
+    }
+
+    public void revertDeleteMode(){
+        List<Challenge> temp = new ArrayList<>();
+        temp.addAll(toBeDeleted);
+        for (Challenge c: temp) {
+            highlightChallenge(c, getItems().indexOf(c));
+        }
+    }
+
+    public void clearToBeDeleted() {
+        toBeDeleted.clear();
+        deleteMode = false;
+        ((MainActivity) context).onChallengeDeleteMode(deleteMode, false);
+    }
+
+    public void highlightChallenge(Challenge challenge, int position) {
+        if (challenge.isHighlighted()) {
+            toBeDeleted.remove(challenge);
+        } else {
+            toBeDeleted.add(challenge);
+        }
+        deleteMode = !toBeDeleted.isEmpty();
+        ((MainActivity) context).onChallengeDeleteMode(deleteMode, false);
+        // based on deleteMode hide/show the header delete button --> call activity
+        challenge.setHighlighted(!challenge.isHighlighted());
+        refreshItem(position);
     }
 
     private String getWinnerStatus(Challenge challenge) {

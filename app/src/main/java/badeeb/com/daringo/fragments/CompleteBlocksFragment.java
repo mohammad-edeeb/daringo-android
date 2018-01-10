@@ -88,7 +88,6 @@ public class CompleteBlocksFragment extends Fragment {
         srlChallengesList = rootView.findViewById(R.id.srlChallengesList);
         srlChallengesList.setColorSchemeResources(R.color.colorAccent);
 
-
         srlChallengesList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -121,9 +120,13 @@ public class CompleteBlocksFragment extends Fragment {
             }
         });
 
-        callGetSubscriptionDetailApi();
-
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        callGetSubscriptionDetailApi();
     }
 
     private void setCompletedBlocks(){
@@ -161,6 +164,7 @@ public class CompleteBlocksFragment extends Fragment {
                         }
                         blocks = completedBlocks;
                     } else {
+                        srlChallengesList.setEnabled(false);
                         checkAllBlocksCompleted(subscription.getBlocks());
                         blocks = subscription.getBlocks();
                     }

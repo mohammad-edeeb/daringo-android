@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,7 @@ import java.util.List;
 import badeeb.com.daringo.R;
 import badeeb.com.daringo.activities.InsideChallengeActivity;
 import badeeb.com.daringo.activities.MainActivity;
-import badeeb.com.daringo.adapters.ChallengesRecyclerAdapter;
+import badeeb.com.daringo.adapters.ActiveChallengesRecyclerAdapter;
 import badeeb.com.daringo.adapters.OnRecyclerItemClick;
 import badeeb.com.daringo.models.Challenge;
 import badeeb.com.daringo.models.requests.BaseRequest;
@@ -30,9 +31,11 @@ import badeeb.com.daringo.models.requests.UnsubscribeRequest;
 import badeeb.com.daringo.models.responses.BaseResponse;
 import badeeb.com.daringo.models.responses.ChallengesListResponse;
 import badeeb.com.daringo.models.responses.EmptyResponse;
+import badeeb.com.daringo.models.responses.ErrorResponse;
 import badeeb.com.daringo.network.ApiClient;
 import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.UiUtils;
+import badeeb.com.daringo.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,7 +43,7 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ActiveChallengesFragment extends Fragment {
+public class ActiveChallengesFragment extends Fragment implements DeleteChallengeFragmentInterface {
 
     public static final String TAG = ActiveChallengesFragment.class.getSimpleName();
 
@@ -50,7 +53,7 @@ public class ActiveChallengesFragment extends Fragment {
     private TextView tvNumOfChallenges;
     private SwipeRefreshLayout srlChallengesList;
 
-    public ChallengesRecyclerAdapter challengesRecyclerAdapter;
+    public ActiveChallengesRecyclerAdapter challengesRecyclerAdapter;
     private OnRecyclerItemClick<Challenge> onChallengeClickedListener;
 
     private MainActivity context;
@@ -70,7 +73,7 @@ public class ActiveChallengesFragment extends Fragment {
         rvChallenges = rootView.findViewById(R.id.rvChallenges);
 
         onChallengeClickedListener = createOnChallengeClickedListener();
-        challengesRecyclerAdapter = new ChallengesRecyclerAdapter(context);
+        challengesRecyclerAdapter = new ActiveChallengesRecyclerAdapter(context);
 
         challengesRecyclerAdapter.setOnRecyclerItemClick(onChallengeClickedListener);
 
@@ -108,9 +111,13 @@ public class ActiveChallengesFragment extends Fragment {
             }
         });
 
-        callGetChallengesListApi();
-
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        callGetChallengesListApi();
     }
 
     private OnRecyclerItemClick<Challenge> createOnChallengeClickedListener() {
@@ -205,6 +212,15 @@ public class ActiveChallengesFragment extends Fragment {
                 if (response.code() == 200) {
                     challengesRecyclerAdapter.clearToBeDeleted();
                     callGetChallengesListApi();
+                } else if (response.code() == 422) {
+                    ErrorResponse errorResponse = Utils.parseErrorResponse(response);
+                    if(errorResponse != null &&
+                            !TextUtils.isEmpty(errorResponse.getMeta().getMessage())){
+                        Toast.makeText(context, errorResponse.getMeta().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    challengesRecyclerAdapter.clearToBeDeleted();
+                    callGetChallengesListApi();
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
                 }
@@ -215,6 +231,11 @@ public class ActiveChallengesFragment extends Fragment {
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void revertDeleteMode() {
+        challengesRecyclerAdapter.revertDeleteMode();
     }
 
     @Override

@@ -140,6 +140,7 @@ public class CreateChallengeFragment extends Fragment {
         socialLoginResponse.enqueue(new Callback<BaseResponse<CreateChallengeResponse>>() {
             @Override
             public void onResponse(Call<BaseResponse<CreateChallengeResponse>> call, Response<BaseResponse<CreateChallengeResponse>> response) {
+                UiUtils.hideKeyboardIfShown(context);
                 if (response.code() == 200) {
                     context.goToChallengeCreatedFragment();
                 } else {
@@ -149,6 +150,7 @@ public class CreateChallengeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<BaseResponse<CreateChallengeResponse>> call, Throwable t) {
+                UiUtils.hideKeyboardIfShown(context);
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
             }
         });

@@ -1,24 +1,21 @@
 package badeeb.com.daringo.services;
 
-import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
-import org.parceler.Parcels;
-
-import badeeb.com.daringo.activities.LoginActivity;
-import badeeb.com.daringo.activities.MainActivity;
 import badeeb.com.daringo.models.User;
 import badeeb.com.daringo.models.requests.BaseRequest;
 import badeeb.com.daringo.models.requests.SocialLoginRequest;
+import badeeb.com.daringo.models.requests.UpdateFcmTokenRequest;
 import badeeb.com.daringo.models.responses.BaseResponse;
+import badeeb.com.daringo.models.responses.EmptyResponse;
 import badeeb.com.daringo.models.responses.SocialLoginResponse;
 import badeeb.com.daringo.network.ApiClient;
 import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.AppSettings;
+import badeeb.com.daringo.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,7 +40,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        handleNewToken(refreshedToken);
+        handleNewToken();
     }
     // [END refresh_token]
 
@@ -53,40 +50,12 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      * Modify this method to associate the user's FCM InstanceID token with any server-side account
      * maintained by your application.
      *
-     * @param token The new token.
      */
-    private void handleNewToken(String token) {
+    private void handleNewToken() {
         AppSettings settings = AppSettings.getInstance();
+        settings.setFcmTokenSaved(false);
         if(settings.isLoggedIn()){
-            callSocialLoginApi(token);
-        } else {
-            settings.setFcmToken(token);
+            Utils.callUpdateFcmTokenApi();
         }
-    }
-
-    private void callSocialLoginApi(String token) {
-        final AppSettings settings = AppSettings.getInstance();
-        User user = settings.getUser();
-        ApiClient apiClient = new ApiClient();
-        ApiInterface apiService = apiClient.getClient(false)
-                .create(ApiInterface.class);
-
-        SocialLoginRequest request = new SocialLoginRequest();
-        request.setUser(user);
-
-        final Call<BaseResponse<SocialLoginResponse>> socialLoginResponse = apiService.socialLogin(new BaseRequest<SocialLoginRequest>(request));
-        socialLoginResponse.enqueue(new Callback<BaseResponse<SocialLoginResponse>>() {
-            @Override
-            public void onResponse(Call<BaseResponse<SocialLoginResponse>> call, Response<BaseResponse<SocialLoginResponse>> response) {
-                if (response.code() == 200) {
-                    User user = response.body().getData().getUser();
-                    settings.saveUser(user);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BaseResponse<SocialLoginResponse>> call, Throwable t) {
-            }
-        });
     }
 }

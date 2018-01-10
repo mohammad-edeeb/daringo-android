@@ -19,7 +19,8 @@ import badeeb.com.daringo.models.User;
 
 public class AppSettings {
 
-    private final static String PREF_FCM_TOKEN = "PREF_FCM_TOKEN";
+    private final static String PREF_FCM_TOKEN_SAVED = "PREF_FCM_TOKEN_SAVED";
+
     private final static String PREF_USER_ID = "PREF_USER_ID";
     private final static String PREF_USER_FIRST_NAME = "PREF_USER_FIRST_NAME";
     private final static String PREF_USER_LAST_NAME = "PREF_USER_LAST_NAME";
@@ -45,6 +46,14 @@ public class AppSettings {
     private AppSettings(Context context) {
         String fileName = context.getString(R.string.app_name);
         this.sPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+    }
+
+    private void putValue(String key, Boolean value) {
+        sPreferences.edit().putBoolean(key, value).commit();
+    }
+
+    private Boolean getValue(String key, Boolean defaultValue) {
+        return sPreferences.getBoolean(key, defaultValue);
     }
 
     private void putValue(String key, String value) {
@@ -87,7 +96,6 @@ public class AppSettings {
         user.setAccountType(getUserAccountType());
         user.setSocialAccountId(getUserSocialAccountId());
         user.setSocialAccountToken(getUserSocialAccountToken());
-        user.setFcmToken(getFcmToken());
         return user;
     }
 
@@ -101,11 +109,10 @@ public class AppSettings {
         setUserAccountType(user.getAccountType());
         setUserSocialAccountId(user.getSocialAccountId());
         setUserSocialAccountToken(user.getSocialAccountToken());
-        setFcmToken(user.getFcmToken());
     }
 
-    public void setFcmToken(String fcmToken) {
-        putValue(PREF_FCM_TOKEN, fcmToken);
+    public void setFcmTokenSaved(boolean fcmTokenSaved){
+        putValue(PREF_FCM_TOKEN_SAVED, fcmTokenSaved);
     }
 
     public void setUserId(int userId) {
@@ -144,8 +151,8 @@ public class AppSettings {
         putValue(PREF_USER_SOCIAL_ACCOUNT_TOKEN, userSocialAccountToken);
     }
 
-    public String getFcmToken() {
-        return getValue(PREF_FCM_TOKEN, "");
+    public Boolean isFcmTokenSaved() {
+        return getValue(PREF_FCM_TOKEN_SAVED, false);
     }
 
     public int getUserId() {

@@ -2,6 +2,7 @@ package badeeb.com.daringo.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -25,6 +26,7 @@ import org.parceler.Parcels;
 
 import badeeb.com.daringo.R;
 import badeeb.com.daringo.activities.InsideChallengeActivity;
+import badeeb.com.daringo.activities.MainActivity;
 import badeeb.com.daringo.adapters.EditBlocksRecyclerAdapter;
 import badeeb.com.daringo.models.Subscription;
 import badeeb.com.daringo.models.requests.BaseRequest;
@@ -123,8 +125,11 @@ public class EditBlocksFragment extends Fragment {
         response.enqueue(new Callback<BaseResponse<EmptyResponse>>() {
             @Override
             public void onResponse(Call<BaseResponse<EmptyResponse>> call, Response<BaseResponse<EmptyResponse>> response) {
+                UiUtils.hideKeyboardIfShown(context);
                 if (response.code() == 200) {
-                    context.goToParticipantsFragment();
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
                 }
@@ -132,6 +137,7 @@ public class EditBlocksFragment extends Fragment {
 
             @Override
             public void onFailure(Call<BaseResponse<EmptyResponse>> call, Throwable t) {
+                UiUtils.hideKeyboardIfShown(context);
                 Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
             }
         });

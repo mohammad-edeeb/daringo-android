@@ -3,6 +3,7 @@ package badeeb.com.daringo.network;
 import badeeb.com.daringo.models.requests.BaseRequest;
 import badeeb.com.daringo.models.requests.CreateChallengeRequest;
 import badeeb.com.daringo.models.requests.UnsubscribeRequest;
+import badeeb.com.daringo.models.requests.UpdateFcmTokenRequest;
 import badeeb.com.daringo.models.requests.UpdateSubscriptionRequest;
 import badeeb.com.daringo.models.responses.BaseResponse;
 import badeeb.com.daringo.models.responses.ChallengesListResponse;
@@ -30,6 +31,9 @@ public interface ApiInterface {
 
     @POST("users/social_login")
     Call<BaseResponse<SocialLoginResponse>> socialLogin(@Body BaseRequest<SocialLoginRequest> request);
+
+    @PUT("users/update_fcm_token")
+    Call<BaseResponse<EmptyResponse>> updateFcmToken(@Body BaseRequest<UpdateFcmTokenRequest> request);
 
     @GET("challenges")
     Call<BaseResponse<ChallengesListResponse>> getChallengesList();

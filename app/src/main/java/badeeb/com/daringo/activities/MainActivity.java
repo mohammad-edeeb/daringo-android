@@ -22,22 +22,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.parceler.Parcels;
 
-import java.util.Calendar;
-
 import badeeb.com.daringo.R;
 import badeeb.com.daringo.fragments.ActiveChallengesFragment;
+import badeeb.com.daringo.fragments.DeleteChallengeFragmentInterface;
 import badeeb.com.daringo.fragments.PastChallengesFragment;
 import badeeb.com.daringo.models.responses.BaseResponse;
 import badeeb.com.daringo.models.User;
@@ -47,6 +45,7 @@ import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.AppSettings;
 import badeeb.com.daringo.utils.CustomTypefaceSpan;
 import badeeb.com.daringo.utils.UiUtils;
+import badeeb.com.daringo.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,6 +59,7 @@ public class MainActivity extends CustomFontActivity
     private User currentUser;
     public boolean deleteMode;
     public FloatingActionButton fab;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +68,14 @@ public class MainActivity extends CustomFontActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-
         settings = AppSettings.getInstance();
 
+        // check if fcm token is saved in the server
+        if(!settings.isFcmTokenSaved()){
+            if(FirebaseInstanceId.getInstance().getToken() != null){
+                Utils.callUpdateFcmTokenApi();
+            }
+        }
 
         if (getIntent().getParcelableExtra(EXTRA_CURRENT_USER) != null) {
             currentUser = Parcels.unwrap(getIntent().getParcelableExtra(EXTRA_CURRENT_USER));
@@ -94,7 +98,7 @@ public class MainActivity extends CustomFontActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         applyFontToNavigationView(navigationView);
 
@@ -104,16 +108,17 @@ public class MainActivity extends CustomFontActivity
         goToActiveChallengesFragment();
     }
 
-    public void onChallengeDeleteMode(boolean deleteMode) {
+    public void onChallengeDeleteMode(boolean deleteMode, boolean showFab) {
         this.deleteMode = deleteMode;
         if(deleteMode){
             UiUtils.hide(fab);
         } else {
-            UiUtils.show(fab);
+            if(showFab){
+                UiUtils.show(fab);
+            }
         }
         invalidateOptionsMenu();
     }
-
 
     private void setUserNameAndPhoto(View headerView) {
         RoundedImageView rivUserPhoto = headerView.findViewById(R.id.rivUserPhoto);
@@ -159,11 +164,14 @@ public class MainActivity extends CustomFontActivity
             drawer.closeDrawer(GravityCompat.START);
         } else if(deleteMode){
             // clear to be deleted challenges
-            ActiveChallengesFragment fragment = (ActiveChallengesFragment) getCurrentFragment();
-            fragment.challengesRecyclerAdapter.revertDeleteMode();
+            DeleteChallengeFragmentInterface fragment = (DeleteChallengeFragmentInterface) getCurrentFragment();
+            fragment.revertDeleteMode();
         }
         else {
             super.onBackPressed();
+        }
+        if(getCurrentFragment() instanceof ActiveChallengesFragment){
+            navigationView.setCheckedItem(R.id.nav_active_challenges);
         }
     }
 
@@ -232,6 +240,8 @@ public class MainActivity extends CustomFontActivity
 
     public void goToActiveChallengesFragment() {
         UiUtils.show(fab);
+        navigationView.setCheckedItem(R.id.nav_active_challenges);
+        Utils.clearFragmentsBackStack(getSupportFragmentManager());
         ActiveChallengesFragment activeChallengesFragment = new ActiveChallengesFragment();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.flMainFrame, activeChallengesFragment, activeChallengesFragment.TAG);
@@ -243,6 +253,7 @@ public class MainActivity extends CustomFontActivity
         PastChallengesFragment pastChallengesFragment = new PastChallengesFragment();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.flMainFrame, pastChallengesFragment, pastChallengesFragment.TAG);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -275,7 +286,7 @@ public class MainActivity extends CustomFontActivity
         bConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ActiveChallengesFragment fragment = (ActiveChallengesFragment) getCurrentFragment();
+                DeleteChallengeFragmentInterface fragment = (DeleteChallengeFragmentInterface) getCurrentFragment();
                 fragment.callUnsubscribeChallengeApi();
                 dialog.dismiss();
             }

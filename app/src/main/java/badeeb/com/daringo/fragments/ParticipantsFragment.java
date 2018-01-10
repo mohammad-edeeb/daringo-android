@@ -2,11 +2,13 @@ package badeeb.com.daringo.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +19,18 @@ import java.util.List;
 
 import badeeb.com.daringo.R;
 import badeeb.com.daringo.activities.InsideChallengeActivity;
+import badeeb.com.daringo.activities.MainActivity;
 import badeeb.com.daringo.adapters.OnRecyclerItemClick;
 import badeeb.com.daringo.adapters.SubscriptionsRecyclerAdapter;
 import badeeb.com.daringo.models.Subscription;
 import badeeb.com.daringo.models.responses.BaseResponse;
+import badeeb.com.daringo.models.responses.ErrorResponse;
 import badeeb.com.daringo.models.responses.SubscriptionsListResponse;
 import badeeb.com.daringo.network.ApiClient;
 import badeeb.com.daringo.network.ApiInterface;
 import badeeb.com.daringo.utils.AppSettings;
 import badeeb.com.daringo.utils.UiUtils;
+import badeeb.com.daringo.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -101,6 +106,16 @@ public class ParticipantsFragment extends Fragment {
                     if (pbLoading.isShown()) {
                         UiUtils.hide(pbLoading);
                     }
+                } else if (response.code() == 422) {
+                    ErrorResponse errorResponse = Utils.parseErrorResponse(response);
+                    if(errorResponse != null &&
+                            !TextUtils.isEmpty(errorResponse.getMeta().getMessage())){
+                        Toast.makeText(context, errorResponse.getMeta().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    Intent intent = new Intent(context, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
                 } else {
                     Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show();
                     UiUtils.show(rvParticipants);
